@@ -215,6 +215,7 @@ public class HomeAdapter extends
             String loggedInUsername = user.getUsername();
             if (loggedInUsername.equalsIgnoreCase(recipeList.get(position).getUser().getUsername())) {
                 holder.getSaveRecipe().setVisibility(View.GONE);
+                holder.getAuthor().setVisibility(View.INVISIBLE);
             }
             List<SavedRecipe> userSavedRecipe = user.getSavedRecipeList().getsavedRecipe();
             List<Integer> userSavedRecipeId = new ArrayList();

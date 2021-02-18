@@ -36,8 +36,8 @@ public class HomeActivity extends AppCompatActivity
     private RecyclerView rvHome;
     private HomeAdapter homeAdapter;
     private ArrayList<Recipe> recipeList;
-    private User user;
-    private int userId;
+    private User loggedUser;
+    private int loggedId;
     private SharedPreferences pref;
 
     @Override
@@ -51,15 +51,15 @@ public class HomeActivity extends AppCompatActivity
         APIService service = RetrofitClient.getRetrofitInstance().create(APIService.class);
 
         pref = getSharedPreferences("user_info", MODE_PRIVATE);
-        userId = pref.getInt("UserId", 0);
+        loggedId = pref.getInt("UserId", 0);
 
-        if (userId != 0) {
-            Call<User> call1 = service.getUser(userId);
+        if (loggedId != 0) {
+            Call<User> call1 = service.getUser(loggedId);
             call1.enqueue(new Callback<User>() {
                 @Override
                 public void onResponse(Call<User> call, Response<User> response) {
                     if (response.isSuccessful()) {
-                        user = response.body();
+                        loggedUser = response.body();
                     }
                 }
 
@@ -121,7 +121,7 @@ public class HomeActivity extends AppCompatActivity
 
                     // binding adpater and layout manager with steps recyclerview
                     rvHome = (RecyclerView) findViewById(R.id.HomeRecycler);
-                    homeAdapter = new HomeAdapter(recipeList, HomeActivity.this, user);
+                    homeAdapter = new HomeAdapter(recipeList, HomeActivity.this, loggedUser);
 
                     rvHome.setAdapter(homeAdapter);
                     LinearLayoutManager lym_rs = new LinearLayoutManager(HomeActivity.this);
@@ -157,7 +157,7 @@ public class HomeActivity extends AppCompatActivity
 
                     // binding adpater and layout manager with steps recyclerview
                     rvHome = (RecyclerView) findViewById(R.id.HomeRecycler);
-                    homeAdapter = new HomeAdapter(recipeList, HomeActivity.this, user);
+                    homeAdapter = new HomeAdapter(recipeList, HomeActivity.this, loggedUser);
 
                     rvHome.setAdapter(homeAdapter);
                     LinearLayoutManager lym_rs = new LinearLayoutManager(HomeActivity.this);
@@ -196,7 +196,7 @@ public class HomeActivity extends AppCompatActivity
 
         int id = view.getId();
         if (id == R.id.fabCreate){
-            if (user == null) {
+            if (loggedId == 0) {
                 Toast.makeText(this, "Need to login to create a recipe", Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(this, Login.class);
                 startActivity(intent);
@@ -204,7 +204,7 @@ public class HomeActivity extends AppCompatActivity
             else {
                 Intent intent = new Intent(this, CreateRecipe.class);
                 intent.setAction("CREATE_RECIPE");
-                intent.putExtra("userId", userId);
+                intent.putExtra("userId", loggedId);
                 startActivity(intent);
             }
         }

@@ -38,15 +38,16 @@ import retrofit2.Response;
 
 public class ViewUserProfile extends AppCompatActivity {
 
-    Button btnlogout;
-    TextView tvUserProfileHeader;
-    TextView tvNoOfRecipe;
-    TextView tvNoOfGroup;
-    int userId;
-    SharedPreferences pref;
-    User user;
-    User loggedUser;
-    APIService service;
+    private Button btnlogout;
+    private TextView tvUserProfileHeader;
+    private TextView tvNoOfRecipe;
+    private TextView tvNoOfGroup;
+    private int viewUserId;
+    private SharedPreferences pref;
+    private User user;
+    private User loggedUser;
+    private int loggedUserId;
+    private APIService service;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,33 +56,42 @@ public class ViewUserProfile extends AppCompatActivity {
 
         pref = getSharedPreferences("user_info", MODE_PRIVATE);
         service = RetrofitClient.getRetrofitInstance().create(APIService.class);
-        getUser();
+
+        viewUserId = getIntent().getIntExtra("userId", 0);
+        loggedUserId = pref.getInt("UserId", 0);
+
+        if (loggedUserId != 0) {
+            getLoggedUser();
+        }
 
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setCustomView(R.layout.action_bar);
-
-        userId = getIntent().getIntExtra("userId", 0);
 
         tvUserProfileHeader = findViewById(R.id.tvUserProfileHeader);
         tvNoOfRecipe = findViewById(R.id.tvNoOfRecipes);
         tvNoOfGroup = findViewById(R.id.tvNoOfGroup);
         btnlogout = findViewById(R.id.btnlogout);
 
-        if (userId == 0) {
-            userId = pref.getInt("UserId", 0);
+        if (viewUserId != 0) {
+            display(viewUserId);
+            btnlogout.setVisibility(View.GONE);
         }
-        if (userId != 0) {
-            display(userId);
-            if (getIntent().getIntExtra("userId", 0) != 0) {
-                btnlogout.setVisibility(View.GONE);
-            }
+        else {
+            display(loggedUserId);
         }
 
         tvNoOfGroup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(), ListGroupActivity.class);
-                intent.putExtra("userId", userId);
+                int viewThisGroup;
+                if (viewUserId == 0) {
+                    viewThisGroup = loggedUserId;
+                }
+                else {
+                    viewThisGroup = viewUserId;
+                }
+                intent.putExtra("userId", viewThisGroup);
                 startActivity(intent);
             }
         });
@@ -195,7 +205,7 @@ public class ViewUserProfile extends AppCompatActivity {
             });*/
         }
     }
-    public void getUser() {
+    public void getLoggedUser() {
         Call<User> call1 = service.getUser(pref.getInt("UserId", 0));
         call1.enqueue(new Callback<User>() {
             @Override
