@@ -227,6 +227,10 @@ public class HomeAdapter extends
                 holder.getSaveRecipe().setTag("saved");
                 holder.saveRecipe.setImageDrawable(context.getDrawable(R.drawable.ic_saved));
             }
+            else {
+                holder.saveRecipe.setImageDrawable(context.getDrawable(R.drawable.ic_unsaved));
+                holder.getSaveRecipe().setTag("unsaved");
+            }
         }
         holder.getAuthor().setText("By " + recipeList.get(position).getUser().getUsername());
         //holder.getDuration().setText(Integer.toString(recipeList.get(position).getDurationInMins()) + "mins");

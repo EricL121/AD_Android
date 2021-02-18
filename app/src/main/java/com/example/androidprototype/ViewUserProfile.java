@@ -45,16 +45,21 @@ public class ViewUserProfile extends AppCompatActivity {
     int userId;
     SharedPreferences pref;
     User user;
+    User loggedUser;
+    APIService service;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_user_profile);
 
+        pref = getSharedPreferences("user_info", MODE_PRIVATE);
+        service = RetrofitClient.getRetrofitInstance().create(APIService.class);
+        getUser();
+
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setCustomView(R.layout.action_bar);
 
-        pref = getSharedPreferences("user_info", MODE_PRIVATE);
         userId = getIntent().getIntExtra("userId", 0);
 
         tvUserProfileHeader = findViewById(R.id.tvUserProfileHeader);
@@ -129,9 +134,7 @@ public class ViewUserProfile extends AppCompatActivity {
     }
 
     public void display(int userId) {
-        APIService service = RetrofitClient.getRetrofitInstance().create(APIService.class);
         Call<User> call = service.getUser(userId);
-
         call.enqueue(new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
@@ -160,8 +163,13 @@ public class ViewUserProfile extends AppCompatActivity {
     }
 
     public void displayRecipe(ArrayList<Recipe> recipeList) {
-
-        HomeAdapter homeAdapter = new HomeAdapter(recipeList, ViewUserProfile.this, user);
+        HomeAdapter homeAdapter;
+        if (loggedUser != null) {
+            homeAdapter = new HomeAdapter(recipeList, ViewUserProfile.this, loggedUser);
+        }
+        else {
+            homeAdapter = new HomeAdapter(recipeList, ViewUserProfile.this, user);
+        }
 
         //RecipeUserProfileAdaptor adaptor = new RecipeUserProfileAdaptor(ViewUserProfile.this, 0);
         //adaptor.setData(recipeList);
@@ -186,5 +194,21 @@ public class ViewUserProfile extends AppCompatActivity {
                 }
             });*/
         }
+    }
+    public void getUser() {
+        Call<User> call1 = service.getUser(pref.getInt("UserId", 0));
+        call1.enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(Call<User> call, Response<User> response) {
+                if (response.isSuccessful()) {
+                    loggedUser = response.body();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+
+            }
+        });
     }
 }
