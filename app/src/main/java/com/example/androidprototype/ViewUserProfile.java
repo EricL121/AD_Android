@@ -44,6 +44,7 @@ public class ViewUserProfile extends AppCompatActivity {
     TextView tvNoOfGroup;
     int userId;
     SharedPreferences pref;
+    User user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,6 +136,7 @@ public class ViewUserProfile extends AppCompatActivity {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
                 if (response.isSuccessful()) {
+                    user = response.body();
                     String userName = response.body().getUsername();
                     int noOfRecipes = response.body().getRecipes().getRecipelist().size();
                     int noOfGroup = response.body().getGroups().getUsergrouplist().size();
@@ -159,7 +161,7 @@ public class ViewUserProfile extends AppCompatActivity {
 
     public void displayRecipe(ArrayList<Recipe> recipeList) {
 
-        HomeAdapter homeAdapter = new HomeAdapter(recipeList, ViewUserProfile.this);
+        HomeAdapter homeAdapter = new HomeAdapter(recipeList, ViewUserProfile.this, user);
 
         //RecipeUserProfileAdaptor adaptor = new RecipeUserProfileAdaptor(ViewUserProfile.this, 0);
         //adaptor.setData(recipeList);

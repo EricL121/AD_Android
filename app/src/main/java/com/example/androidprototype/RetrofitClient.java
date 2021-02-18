@@ -17,8 +17,8 @@ public class RetrofitClient {
 
     //private static final String BASE_URL = "https://jsonplaceholder.typicode.com";
     private static final String BASE_URL = "http://10.0.2.2:53533";
-    //private static final String BASE_URL = "https://recipe4me.azurewebsites.net";
-
+//    private static final String BASE_URL = "https://recipe4me.azurewebsites.net";
+//
 
 //Create the Retrofit instance//
 

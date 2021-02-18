@@ -250,9 +250,9 @@ public class ListGroupActivity extends AppCompatActivity
                    if (tvMg != null) {
                        tvMg.setText(username + "'s Groups");
                    }
-                    if (btnShowAll != null) {
-                        btnShowAll.setVisibility(View.GONE);
-                    }
+//                    if (btnShowAll != null) {
+//                        btnShowAll.setVisibility(View.GONE);
+//                    }
                 }
             }
 

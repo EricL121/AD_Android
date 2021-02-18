@@ -225,6 +225,7 @@ public class HomeAdapter extends
             int currentRecipeId = recipeList.get(position).getId();
             if (userSavedRecipeId.contains(currentRecipeId)) {
                 holder.getSaveRecipe().setTag("saved");
+                holder.saveRecipe.setImageDrawable(context.getDrawable(R.drawable.ic_saved));
             }
         }
         holder.getAuthor().setText("By " + recipeList.get(position).getUser().getUsername());
