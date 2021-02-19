@@ -38,92 +38,60 @@ import retrofit2.Response;
 
 public class ViewUserProfile extends AppCompatActivity {
 
-    Button btnlogout;
-    TextView tvUserProfileHeader;
-    TextView tvNoOfRecipe;
-    TextView tvNoOfGroup;
-    int userId;
-    SharedPreferences pref;
-
-    User loggedinu;
-
+    private Button btnlogout;
+    private TextView tvUserProfileHeader;
+    private TextView tvNoOfRecipe;
+    private TextView tvNoOfGroup;
+    private int viewUserId;
+    private SharedPreferences pref;
+    private User user;
+    private User loggedUser;
+    private int loggedUserId;
+    private APIService service;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_user_profile);
 
+        pref = getSharedPreferences("user_info", MODE_PRIVATE);
+        service = RetrofitClient.getRetrofitInstance().create(APIService.class);
+
+        viewUserId = getIntent().getIntExtra("userId", 0);
+        loggedUserId = pref.getInt("UserId", 0);
+
+        if (loggedUserId != 0) {
+            getLoggedUser();
+        }
+
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setCustomView(R.layout.action_bar);
-
-        pref = getSharedPreferences("user_info", MODE_PRIVATE);
-        userId = getIntent().getIntExtra("userId", 0);
-        int userIdd = pref.getInt("UserId",0);
-
-        //apiService = RetrofitClient.getRetrofitInstance().create(APIService.class);
-
-        /*Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-            }
-        });
-
-        thread.start();*/
-
-        //Call<User> call = apiService.getUser(pref.getInt("UserId", 0));
-        //call.enqueue(new Callback<User>() {
-        //    @Override
-        //    public void onResponse(Call<User> call, Response<User> response) {
-        //        user = response.body();
-        //    }
-
-       //     @Override
-       //     public void onFailure(Call<User> call, Throwable t) {
-
-      //      }
-       // });
-
-
-        int userIdAcc = pref.getInt("UserId", 0);
-        APIService service = RetrofitClient.getRetrofitInstance().create(APIService.class);
-        if (userIdAcc != 0) {
-            Call<User> call1 = service.getUser(userIdAcc);
-            call1.enqueue(new Callback<User>() {
-                @Override
-                public void onResponse(Call<User> call, Response<User> response) {
-                    if (response.isSuccessful()) {
-                        loggedinu = response.body();
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<User> call, Throwable t) {
-                    System.out.println("Fail to get user. redirect to login");
-                }
-            });
-        }
 
         tvUserProfileHeader = findViewById(R.id.tvUserProfileHeader);
         tvNoOfRecipe = findViewById(R.id.tvNoOfRecipes);
         tvNoOfGroup = findViewById(R.id.tvNoOfGroup);
         btnlogout = findViewById(R.id.btnlogout);
 
-        if (userId == 0) {
-            userId = pref.getInt("UserId", 0);
+        if (viewUserId != 0) {
+            display(viewUserId);
+            btnlogout.setVisibility(View.GONE);
         }
-        if (userId != 0) {
-            display(userId);
-            if (getIntent().getIntExtra("userId", 0) != 0) {
-                btnlogout.setVisibility(View.GONE);
-            }
+        else {
+            display(loggedUserId);
         }
 
         tvNoOfGroup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(), ListGroupActivity.class);
-                intent.putExtra("userId", userId);
+                int viewThisGroup;
+                if (viewUserId == 0) {
+                    viewThisGroup = loggedUserId;
+                }
+                else {
+                    viewThisGroup = viewUserId;
+                }
+                intent.putExtra("userId", viewThisGroup);
                 startActivity(intent);
             }
         });
@@ -176,13 +144,12 @@ public class ViewUserProfile extends AppCompatActivity {
     }
 
     public void display(int userId) {
-        APIService service = RetrofitClient.getRetrofitInstance().create(APIService.class);
         Call<User> call = service.getUser(userId);
-
         call.enqueue(new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
                 if (response.isSuccessful()) {
+                    user = response.body();
                     String userName = response.body().getUsername();
                     int noOfRecipes = response.body().getRecipes().getRecipelist().size();
                     int noOfGroup = response.body().getGroups().getUsergrouplist().size();
@@ -206,10 +173,13 @@ public class ViewUserProfile extends AppCompatActivity {
     }
 
     public void displayRecipe(ArrayList<Recipe> recipeList) {
-
-
-        HomeAdapter homeAdapter = new HomeAdapter(recipeList, ViewUserProfile.this, loggedinu);
-
+        HomeAdapter homeAdapter;
+        if (loggedUser != null) {
+            homeAdapter = new HomeAdapter(recipeList, ViewUserProfile.this, loggedUser);
+        }
+        else {
+            homeAdapter = new HomeAdapter(recipeList, ViewUserProfile.this, user);
+        }
 
         //RecipeUserProfileAdaptor adaptor = new RecipeUserProfileAdaptor(ViewUserProfile.this, 0);
         //adaptor.setData(recipeList);
@@ -234,5 +204,21 @@ public class ViewUserProfile extends AppCompatActivity {
                 }
             });*/
         }
+    }
+    public void getLoggedUser() {
+        Call<User> call1 = service.getUser(pref.getInt("UserId", 0));
+        call1.enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(Call<User> call, Response<User> response) {
+                if (response.isSuccessful()) {
+                    loggedUser = response.body();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+
+            }
+        });
     }
 }
