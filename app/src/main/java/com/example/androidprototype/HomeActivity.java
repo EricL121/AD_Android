@@ -235,7 +235,6 @@ public class HomeActivity extends AppCompatActivity
             }
             else {
                 Intent intent = new Intent(this, ViewUserProfile.class);
-                intent.putExtra("userId", userId);
                 startActivity(intent);
             }
         }
