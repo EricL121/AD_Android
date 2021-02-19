@@ -215,6 +215,7 @@ public class HomeAdapter extends
             String loggedInUsername = user.getUsername();
             if (loggedInUsername.equalsIgnoreCase(recipeList.get(position).getUser().getUsername())) {
                 holder.getSaveRecipe().setVisibility(View.GONE);
+                holder.getAuthor().setVisibility(View.INVISIBLE);
             }
             List<SavedRecipe> userSavedRecipe = user.getSavedRecipeList().getsavedRecipe();
             List<Integer> userSavedRecipeId = new ArrayList();
@@ -225,6 +226,11 @@ public class HomeAdapter extends
             int currentRecipeId = recipeList.get(position).getId();
             if (userSavedRecipeId.contains(currentRecipeId)) {
                 holder.getSaveRecipe().setTag("saved");
+                holder.saveRecipe.setImageDrawable(context.getDrawable(R.drawable.ic_saved));
+            }
+            else {
+                holder.saveRecipe.setImageDrawable(context.getDrawable(R.drawable.ic_unsaved));
+                holder.getSaveRecipe().setTag("unsaved");
             }
         }
         holder.getAuthor().setText("By " + recipeList.get(position).getUser().getUsername());

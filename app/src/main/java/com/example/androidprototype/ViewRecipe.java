@@ -45,7 +45,7 @@ public class ViewRecipe extends AppCompatActivity
     private int rId;
     private Recipe recipe;
     private APIService service;
-    private int userId;
+    private int loggedUserId;
     private RecyclerView rvSteps;
     private SharedPreferences pref;
 
@@ -59,7 +59,7 @@ public class ViewRecipe extends AppCompatActivity
 
         // Need to change after user login is done
         pref = getSharedPreferences("user_info", MODE_PRIVATE);
-        userId = pref.getInt("UserId", 0);
+        loggedUserId = pref.getInt("UserId", 0);
 
         Intent intent = getIntent();
         int recipeId = intent.getIntExtra("RecipeId",0);
@@ -72,6 +72,11 @@ public class ViewRecipe extends AppCompatActivity
         ImageButton edit = findViewById(R.id.edit);
         Button postToGrp = findViewById(R.id.post2Grp);
         ImageButton delete = findViewById(R.id.btnDeleteRecipe);
+
+        // Prevent flickering
+        postToGrp.setVisibility(View.GONE);
+        edit.setVisibility(View.GONE);
+        delete.setVisibility(View.GONE);
 
         /*back.setOnClickListener(this);*/
         edit.setOnClickListener(this);
@@ -100,9 +105,11 @@ public class ViewRecipe extends AppCompatActivity
                 TextView tag = findViewById(R.id.recipeTags);
                 TextView duration = findViewById(R.id.recipeDuration);
 
-                if (recipe.getUserId() != userId)
+                if (recipe.getUserId() == loggedUserId)
                 {
-                    postToGrp.setVisibility(View.GONE);
+                    postToGrp.setVisibility(View.VISIBLE);
+                    edit.setVisibility(View.VISIBLE);
+                    delete.setVisibility(View.VISIBLE);
                 }
 
                 name.setText(recipe.getTitle());
@@ -195,11 +202,6 @@ public class ViewRecipe extends AppCompatActivity
                     rvSteps.setLayoutManager(lym_rs);
                     rvSteps.addItemDecoration(new DividerItemDecoration(ViewRecipe.this, DividerItemDecoration.VERTICAL));
                 }
-
-                if (userId != recipe.getUserId()) {
-                    edit.setVisibility(View.GONE);
-                    delete.setVisibility(View.GONE);
-                }
             }
 
             @Override
@@ -242,7 +244,7 @@ public class ViewRecipe extends AppCompatActivity
             builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    if (userId == recipeCreatedByUserId) {
+                    if (loggedUserId == recipeCreatedByUserId) {
                         deleteRecipe(recipeId);
                     }
                 }
@@ -269,7 +271,7 @@ public class ViewRecipe extends AppCompatActivity
 
         if (id == R.id.groups) {
             Intent intent = new Intent(this, ListGroupActivity.class);
-            intent.setAction("view");
+            intent.setAction("showAll");
             startActivity(intent);
         }
 
@@ -325,7 +327,7 @@ public class ViewRecipe extends AppCompatActivity
             public void onResponse(Call<booleanJson> call, Response<booleanJson> response) {
                 if (response.isSuccessful()) {
                     Intent intent = new Intent(getApplicationContext(), ViewUserProfile.class);
-                    intent.putExtra("userId", userId);
+                    intent.putExtra("userId", loggedUserId);
                     startActivity(intent);
                 }
             }

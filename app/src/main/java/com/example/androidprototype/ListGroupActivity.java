@@ -39,12 +39,13 @@ public class ListGroupActivity extends AppCompatActivity
     private ArrayList<Group> myGroups;
     private RecyclerView rvGroup;
     private GroupAdapter groupAdapter;
-    private int userId; // get from intent when coming in from userprofile
+    private int viewThisUserId; // get from intent when coming in from userprofile
     private APIService service;
     private SharedPreferences pref;
     private Button btnShowAll;
     private String username;
     private TextView tvMg;
+    private int loggedUserId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,15 +57,25 @@ public class ListGroupActivity extends AppCompatActivity
 
         service = RetrofitClient.getRetrofitInstance().create(APIService.class);
         pref = getSharedPreferences("user_info", MODE_PRIVATE);
+        loggedUserId = pref.getInt("UserId", 0);
         btnShowAll = findViewById(R.id.btnShowAll);
         tvMg = findViewById(R.id.mG);
 
         // for user to view groups that other users have joined
-        userId = getIntent().getIntExtra("userId", 0);
+        viewThisUserId = getIntent().getIntExtra("userId", 0);
 
         // display the groups that the logged in user has joined
-        if (userId == 0) {
-            userId = pref.getInt("UserId", 0);
+        if (viewThisUserId != 0) {
+            getUserGroup(viewThisUserId);
+        }
+        else if (getIntent().getAction() == "showAll") {
+            getGroups();
+        }
+        else if (loggedUserId != 0){
+            getUserGroup(loggedUserId);
+        }
+        else {
+            getGroups();
         }
 
         SearchView simpleSearchView = (SearchView) findViewById(R.id.simpleSearchView);
@@ -136,17 +147,6 @@ public class ListGroupActivity extends AppCompatActivity
             }
         }
 
-        else if (getIntent().getAction() == "showAll") {
-            getGroups();
-        }
-
-        else if (userId != 0) {
-            getUserGroup(userId);
-        }
-        else {
-            getGroups();
-        }
-
         /*Button test = findViewById(R.id.test);
         test.setOnClickListener(this);*/
 
@@ -183,7 +183,7 @@ public class ListGroupActivity extends AppCompatActivity
 
         if (id == R.id.groups) {
             Intent intent = new Intent(this, ListGroupActivity.class);
-            intent.putExtra("userId", userId);
+            intent.putExtra("userId", viewThisUserId);
             intent.setAction("showAll");
             startActivity(intent);
         }
@@ -250,9 +250,6 @@ public class ListGroupActivity extends AppCompatActivity
                    if (tvMg != null) {
                        tvMg.setText(username + "'s Groups");
                    }
-                    /*if (btnShowAll != null) {
-                        btnShowAll.setVisibility(View.GONE);
-                    }*/
                 }
             }
 
